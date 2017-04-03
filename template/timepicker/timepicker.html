@@ -1,26 +1,30 @@
-<table>
+<table class="bootstrap-timepicker" ng-class="{ lock: disabled }">
 	<tbody>
-		<tr class="text-center">
-			<td><a ng-click="incrementHours()" class="btn btn-link"><span class="glyphicon glyphicon-chevron-up"></span></a></td>
-			<td>&nbsp;</td>
-			<td><a ng-click="incrementMinutes()" class="btn btn-link"><span class="glyphicon glyphicon-chevron-up"></span></a></td>
-			<td ng-show="showMeridian"></td>
-		</tr>
 		<tr>
-			<td class="form-group" ng-class="{'has-error': invalidHours}">
-				<input style="width:50px;" type="text" ng-model="hours" ng-change="updateHours()" class="form-control text-center" ng-readonly="readonlyInput" maxlength="2">
+			<td ng-class="{'has-error': invalidHours}">
+				<div class="cell-wrapper">
+					<input style="width:60px;" type="text" ng-model="hours" ng-change="updateHours()" ng-readonly="readonlyInput" maxlength="2">
+					<div class="arrow-controls">
+						<a ng-click="incrementHours()"><span class="icon icon-chevron-up"></span></a>
+						<a ng-click="decrementHours()"><span class="icon icon-chevron-down"></span></a>
+					</div>
+				</div>
 			</td>
-			<td>:</td>
-			<td class="form-group" ng-class="{'has-error': invalidMinutes}">
-				<input style="width:50px;" type="text" ng-model="minutes" ng-change="updateMinutes()" class="form-control text-center" ng-readonly="readonlyInput" maxlength="2">
+			<td>
+				<div class="time-dots">:</div>
 			</td>
-			<td ng-show="showMeridian"><button type="button" class="btn btn-default text-center" ng-click="toggleMeridian()">{{meridian}}</button></td>
-		</tr>
-		<tr class="text-center">
-			<td><a ng-click="decrementHours()" class="btn btn-link"><span class="glyphicon glyphicon-chevron-down"></span></a></td>
-			<td>&nbsp;</td>
-			<td><a ng-click="decrementMinutes()" class="btn btn-link"><span class="glyphicon glyphicon-chevron-down"></span></a></td>
-			<td ng-show="showMeridian"></td>
+			<td ng-class="{'has-error': invalidMinutes}">
+				<div class="cell-wrapper">
+					<input style="width:60px;" type="text" ng-model="minutes" ng-change="updateMinutes()" ng-readonly="readonlyInput" maxlength="2">
+					<div class="arrow-controls">
+						<a ng-click="incrementMinutes()"><span class="icon icon-chevron-up"></span></a>
+						<a ng-click="decrementMinutes()"><span class="icon icon-chevron-down"></span></a>
+					</div>
+				</div>
+			</td>
+			<td ng-show="showMeridian">
+				<button type="button" class="am-pm-bttn" ng-click="toggleMeridian()">{{meridian}}</button>
+			</td>
 		</tr>
 	</tbody>
 </table>
