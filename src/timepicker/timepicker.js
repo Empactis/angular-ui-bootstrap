@@ -15,6 +15,20 @@ angular.module('ui.bootstrap.timepicker', [])
       ngModelCtrl = { $setViewValue: angular.noop }, // nullModelCtrl
       meridians = angular.isDefined($attrs.meridians) ? $scope.$parent.$eval($attrs.meridians) : timepickerConfig.meridians || $locale.DATETIME_FORMATS.AMPMS;
 
+      $scope.disabled = false;
+      if($attrs.ngDisabled){
+          $scope.$on('destroy', $scope.$parent.$watch($parse($attrs.ngDisabled), function(dis){
+              $scope.disabled = dis;
+
+              if($scope.disabled){
+                  $scope.readonlyInput = true;
+              }
+              else{
+                  resetReadonlyInput();
+              }
+          }));
+      }
+
   this.init = function( ngModelCtrl_, inputs ) {
     ngModelCtrl = ngModelCtrl_;
     ngModelCtrl.$render = this.render;
@@ -35,10 +49,13 @@ angular.module('ui.bootstrap.timepicker', [])
     if (arrowkeys) {
       this.setupArrowkeyEvents( hoursInputEl, minutesInputEl );
     }
-
-    $scope.readonlyInput = angular.isDefined($attrs.readonlyInput) ? $scope.$parent.$eval($attrs.readonlyInput) : timepickerConfig.readonlyInput;
+    resetReadonlyInput();
     this.setupInputEvents( hoursInputEl, minutesInputEl );
   };
+
+  function resetReadonlyInput(){
+      $scope.readonlyInput = angular.isDefined($attrs.readonlyInput) ? $scope.$parent.$eval($attrs.readonlyInput) : timepickerConfig.readonlyInput;
+  }
 
   var hourStep = timepickerConfig.hourStep;
   if ($attrs.hourStep) {
@@ -254,6 +271,7 @@ angular.module('ui.bootstrap.timepicker', [])
   }
 
   function addMinutes( minutes ) {
+      if($scope.disabled) return;
     var dt = new Date( selected.getTime() + minutes * 60000 );
     selected.setHours( dt.getHours(), dt.getMinutes() );
     refresh();

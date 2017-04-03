@@ -10,8 +10,8 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
   datepickerMode: 'day',
   minMode: 'day',
   maxMode: 'year',
-  showWeeks: true,
-  startingDay: 0,
+  showWeeks: false,
+  startingDay: 1,
   yearRange: 20,
   minDate: null,
   maxDate: null,
@@ -69,6 +69,16 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
 
   this.init = function( ngModelCtrl_ ) {
     ngModelCtrl = ngModelCtrl_;
+
+    ngModelCtrl.$parsers.unshift(function (viewValue) {
+        var localDate, localTime, localOffset;
+
+        localDate = viewValue;
+        localTime = localDate.getTime();
+        localOffset = localDate.getTimezoneOffset() * 60000;
+
+        return new Date(localTime - localOffset);
+    });
 
     ngModelCtrl.$render = function() {
       self.render();
@@ -130,7 +140,14 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
 
   $scope.select = function( date ) {
     if ( $scope.datepickerMode === self.minMode ) {
-      var dt = ngModelCtrl.$viewValue ? new Date( ngModelCtrl.$viewValue ) : new Date(0, 0, 0, 0, 0, 0, 0);
+      var dt = null;
+      if(ngModelCtrl.$viewValue){
+          dt = new Date( ngModelCtrl.$viewValue );
+      }
+      else{
+          dt = new Date();
+          dt.setHours(0, 0, 0, 0);
+      }
       dt.setFullYear( date.getFullYear(), date.getMonth(), date.getDate() );
       ngModelCtrl.$setViewValue( dt );
       ngModelCtrl.$render();
@@ -201,14 +218,14 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
   return {
     restrict: 'EA',
     replace: true,
-    templateUrl: 'template/datepicker/datepicker.html',
+    template: require('./partials/datepicker.html'),
     scope: {
       datepickerMode: '=?',
       dateDisabled: '&',
       customClass: '&',
       shortcutPropagation: '&?'
     },
-    require: ['datepicker', '?^ngModel'],
+    require: ['datepicker', '^ngModel'],
     controller: 'DatepickerController',
     link: function(scope, element, attrs, ctrls) {
       var datepickerCtrl = ctrls[0], ngModelCtrl = ctrls[1];
@@ -224,7 +241,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
   return {
     restrict: 'EA',
     replace: true,
-    templateUrl: 'template/datepicker/day.html',
+    template: require('./partials/day.html'),
     require: '^datepicker',
     link: function(scope, element, attrs, ctrl) {
       scope.showWeeks = ctrl.showWeeks;
@@ -335,7 +352,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
   return {
     restrict: 'EA',
     replace: true,
-    templateUrl: 'template/datepicker/month.html',
+    template: require('./partials/month.html'),
     require: '^datepicker',
     link: function(scope, element, attrs, ctrl) {
       ctrl.step = { years: 1 };
@@ -390,7 +407,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
   return {
     restrict: 'EA',
     replace: true,
-    templateUrl: 'template/datepicker/year.html',
+    template: require('./partials/year.html'),
     require: '^datepicker',
     link: function(scope, element, attrs, ctrl) {
       var range = ctrl.yearRange;
@@ -661,10 +678,17 @@ function ($compile, $parse, $document, $position, dateFilter, dateParser, datepi
         }
       };
 
+      var elementClickBind = function(event){
+          scope.$apply(function(){
+              scope.isOpen = true;
+          });
+      };
+
       var keydown = function(evt, noApply) {
         scope.keydown(evt);
       };
       element.bind('keydown', keydown);
+      element.bind('click', elementClickBind);
 
       scope.keydown = function(evt) {
         if (evt.which === 27) {
@@ -721,6 +745,7 @@ function ($compile, $parse, $document, $position, dateFilter, dateParser, datepi
       scope.$on('$destroy', function() {
         $popup.remove();
         element.unbind('keydown', keydown);
+        element.unbind('click', elementClickBind);
         $document.unbind('click', documentClickBind);
       });
     }
@@ -732,7 +757,7 @@ function ($compile, $parse, $document, $position, dateFilter, dateParser, datepi
     restrict:'EA',
     replace: true,
     transclude: true,
-    templateUrl: 'template/datepicker/popup.html',
+    template: require('./partials/popup.html'),
     link:function (scope, element, attrs) {
       element.bind('click', function(event) {
         event.preventDefault();
